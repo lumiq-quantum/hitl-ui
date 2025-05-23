@@ -159,7 +159,7 @@ export default function UserChannelsPage() {
     }
   };
   
-  const columns = useMemo(() => getUserChannelTableColumns(handleEditOpen, handleDeleteOpen, usersMap, channelsMap), [usersMap, channelsMap]);
+  const columns = useMemo(() => getUserChannelTableColumns(handleEditOpen, handleDeleteOpen, usersMap, channelsMap), [usersMap, channelsMap, handleEditOpen, handleDeleteOpen]);
   
   const isLoadingInitialData = (isLoadingUserChannels && pageIndex === 0 && !userChannelsData) || isLoadingAllUsers || isLoadingAllChannels;
 
@@ -308,7 +308,7 @@ export default function UserChannelsPage() {
           isOpen={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
           onConfirm={handleDeleteConfirm}
-          itemName={`Mapping for User: ${usersMap.get(selectedUserChannel.user_id)?.name || selectedUserChannel.user_id} & Channel: ${channelsMap.get(selectedUserChannel.channel_id)?.name || selectedUserChannel.channel_id}`}
+          itemName={`Mapping for User: ${usersMap.get(selectedUserChannel.user_id)?.name || `ID ${selectedUserChannel.user_id}`} & Channel: ${channelsMap.get(selectedUserChannel.channel_id)?.name || `ID ${selectedUserChannel.channel_id}`}`}
           itemType="user-channel mapping"
           isPending={deleteMutation.isPending}
         />

@@ -89,7 +89,7 @@ export const getUserChannelTableColumns = (
     header: "User",
     cell: ({ row }) => {
       const user = usersMap.get(row.original.user_id);
-      return user ? (user.name || `ID: ${user.id}`) : `User ID: ${row.original.user_id}`;
+      return user ? (user.name || `User ID: ${user.id}`) : `User ID: ${row.original.user_id}`;
     },
   },
   {
