@@ -9,8 +9,8 @@ import { PanelLeft } from "lucide-react";
 function generateTitle(pathname: string): string {
   if (pathname.startsWith("/settings/channels")) return "Channel Management";
   if (pathname.startsWith("/settings/users")) return "User Management";
-  if (pathname.startsWith("/settings/user-channels")) return "User-Channel Mapping";
-  return "AdminZen";
+  if (pathname.startsWith("/settings/user-channels")) return "User Channel Mapping";
+  return "Human In The Loop";
 }
 
 export function AppHeader() {

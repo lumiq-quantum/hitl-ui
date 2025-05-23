@@ -90,7 +90,7 @@ export function DataTable<TData, TValue>({
             placeholder={searchPlaceholder}
             value={searchValue || ""}
             onChange={(event) => onSearchChange(event.target.value)}
-            className="max-w-sm w-full sm:w-auto"
+            className="max-w-sm w-full"
           />
         )}
         {filterComponent && <div className="flex-grow w-full sm:w-auto">{filterComponent}</div>}

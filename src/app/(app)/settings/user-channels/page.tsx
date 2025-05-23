@@ -38,12 +38,12 @@ export default function UserChannelsPage() {
 
   const { data: usersForFilter, isLoading: isLoadingUsersForFilter } = useQuery<UserOut[], Error>({
     queryKey: ["users", "allForFilter"], // Distinct key for all users for filter
-    queryFn: () => api.listUsers({ limit: 1000 }), // Fetch a large number for filter dropdown
+    queryFn: () => api.listUsers({ limit: 99 }), // Fetch a large number for filter dropdown
   });
 
   const { data: channelsForFilter, isLoading: isLoadingChannelsForFilter } = useQuery<ChannelOut[], Error>({
     queryKey: ["channels", "allForFilter"], // Distinct key for all channels for filter
-    queryFn: () => api.listChannels({ limit: 1000 }), // Fetch a large number for filter dropdown
+    queryFn: () => api.listChannels({ limit: 99 }), // Fetch a large number for filter dropdown
   });
 
   const uniqueChannelTypesForFilter = useMemo(() => {
@@ -70,12 +70,12 @@ export default function UserChannelsPage() {
   // Used for populating UserChannelForm and table display
   const { data: allUsers, isLoading: isLoadingAllUsers } = useQuery<UserOut[], Error>({
     queryKey: ["users", "allForFormAndTable"],
-    queryFn: () => api.listUsers({ limit: 1000 }), // Fetch all for form/table mapping
+    queryFn: () => api.listUsers({ limit: 99 }), // Fetch all for form/table mapping
   });
 
   const { data: allChannels, isLoading: isLoadingAllChannels } = useQuery<ChannelOut[], Error>({
     queryKey: ["channels", "allForFormAndTable"],
-    queryFn: () => api.listChannels({ limit: 1000}), // Fetch all for form/table mapping
+    queryFn: () => api.listChannels({ limit: 99}), // Fetch all for form/table mapping
   });
 
 
@@ -266,7 +266,7 @@ export default function UserChannelsPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>User-Channel Mappings</CardTitle>
+          <CardTitle>User Channel Mappings</CardTitle>
           <CardDescription>Manage user preferences for communication channels.</CardDescription>
         </div>
         <Button onClick={handleCreateOpen} size="sm" disabled={isLoadingAllUsers || isLoadingAllChannels}>

@@ -188,7 +188,7 @@ export function UserChannelForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{defaultValues?.id ? "Edit User-Channel Mapping" : "Create New User-Channel Mapping"}</DialogTitle>
+        <DialogTitle>{defaultValues?.id ? "Edit User Channel Mapping" : "Create New User Channel Mapping"}</DialogTitle>
         <DialogDescription>
           {defaultValues?.id ? "Update this user-channel mapping." : "Define a new mapping between a user and a channel."}
         </DialogDescription>

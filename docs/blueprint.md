@@ -8,7 +8,7 @@
 - Channel Deletion: Allow administrators to remove channels that are no longer in use or misconfigured.
 - User Listing: Display a comprehensive list of users with details like name, email, and associated metadata.
 - User Creation: Provide the ability to create new user profiles within the system.
-- User-Channel Mapping: Offer tools to manage the connections and preferences for channels on a per-user basis.
+- User Channel Mapping: Offer tools to manage the connections and preferences for channels on a per-user basis.
 
 ## Style Guidelines:
 

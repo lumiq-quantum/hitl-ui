@@ -31,7 +31,7 @@ export function AppSidebarContent() {
       <SidebarHeader className={cn("p-4", open ? "flex" : "justify-center")}>
         <Link href="/" className="flex items-center gap-2">
           <AppLogo className="h-8 w-8 text-primary" />
-          {open && <span className="text-xl font-semibold text-foreground">AdminZen</span>}
+          {open && <span className="text-xl font-semibold text-foreground">Human In The Loop</span>}
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -56,7 +56,7 @@ export function AppSidebarContent() {
         </SidebarMenu>
       </SidebarContent>
       {/* <SidebarFooter className="p-4">
-        {open && <p className="text-xs text-muted-foreground">&copy; 2024 AdminZen</p>}
+        {open && <p className="text-xs text-muted-foreground">&copy; 2024 Human In The Loop</p>}
       </SidebarFooter> */}
     </>
   );

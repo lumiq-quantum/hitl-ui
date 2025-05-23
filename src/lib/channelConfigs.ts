@@ -53,7 +53,7 @@ export function formatChannelTypeLabel(typeKey: string): string {
     .join(" ");
 }
 
-// Configuration for User-Channel mapping contact details
+// Configuration for User Channel mapping contact details
 export const channelContactDetailMapping: Record<string, 'email' | 'phone'> = {
   "whatsapp": "phone",
   "telegram": "phone",
@@ -66,8 +66,8 @@ export const channelContactDetailMapping: Record<string, 'email' | 'phone'> = {
   "discord": "email"
 };
 
-export const CONTACT_KEY_EMAIL = "email_address";
-export const CONTACT_KEY_PHONE = "phone_number";
+export const CONTACT_KEY_EMAIL = "email";
+export const CONTACT_KEY_PHONE = "phone";
 
 /**
  * Determines the type of input field to display for contact details based on channel type.
