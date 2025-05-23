@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -5,7 +6,12 @@ import type { UserChannelOut, UserOut, ChannelOut } from "@/types";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Edit3, MoreHorizontal, Trash2, CheckCircle, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { 
+  CONTACT_KEY_EMAIL, 
+  CONTACT_KEY_PHONE, 
+  getContactInputTypeForChannel, 
+  formatConfigKeyLabel 
+} from "@/lib/channelConfigs";
 
 interface UserChannelTableActionsProps {
   userChannel: UserChannelOut;
@@ -38,6 +44,36 @@ function UserChannelTableActions({ userChannel, onEdit, onDelete }: UserChannelT
   );
 }
 
+function formatContactDetailsForDisplay(
+  contactDetails: Record<string, any> | null | undefined,
+  channelType: string | undefined | null
+): string {
+  if (!contactDetails || Object.keys(contactDetails).length === 0) {
+    return "N/A";
+  }
+
+  if (channelType) {
+    const inputType = getContactInputTypeForChannel(channelType);
+    if (inputType === 'email' && contactDetails[CONTACT_KEY_EMAIL]) {
+      return String(contactDetails[CONTACT_KEY_EMAIL]);
+    }
+    if (inputType === 'phone' && contactDetails[CONTACT_KEY_PHONE]) {
+      return String(contactDetails[CONTACT_KEY_PHONE]);
+    }
+  }
+
+  // Fallback for 'json' type or if specific keys are not found
+  const entries = Object.entries(contactDetails)
+    .map(([key, value]) => `${formatConfigKeyLabel(key)}: ${String(value)}`);
+  
+  let detailsStr = entries.join(', ');
+  if (detailsStr.length > 60) {
+    detailsStr = `${detailsStr.substring(0, 57)}...`;
+  }
+  return detailsStr;
+}
+
+
 export const getUserChannelTableColumns = (
   onEdit: (userChannel: UserChannelOut) => void,
   onDelete: (userChannel: UserChannelOut) => void,
@@ -68,14 +104,11 @@ export const getUserChannelTableColumns = (
     accessorKey: "contact_details",
     header: "Contact Details",
     cell: ({ row }) => {
-      const details = row.original.contact_details;
-      if (!details || Object.keys(details).length === 0) {
-        return <span className="text-muted-foreground">N/A</span>;
-      }
-      const detailsStr = JSON.stringify(details);
+      const channel = channelsMap.get(row.original.channel_id);
+      const formattedDetails = formatContactDetailsForDisplay(row.original.contact_details, channel?.type);
       return (
-         <div title={detailsStr} className="max-w-xs truncate text-sm text-muted-foreground">
-          {detailsStr.length > 50 ? `${detailsStr.substring(0, 50)}...` : detailsStr}
+         <div title={formattedDetails === "N/A" ? undefined : JSON.stringify(row.original.contact_details)} className="max-w-md truncate text-sm text-muted-foreground">
+          {formattedDetails}
         </div>
       );
     },
@@ -94,3 +127,4 @@ export const getUserChannelTableColumns = (
     cell: ({ row }) => <UserChannelTableActions userChannel={row.original} onEdit={onEdit} onDelete={onDelete} />,
   },
 ];
+

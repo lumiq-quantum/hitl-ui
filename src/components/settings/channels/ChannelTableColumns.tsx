@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Edit3, MoreHorizontal, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatConfigKeyLabel } from "@/lib/channelConfigs";
 
 interface ChannelTableActionsProps {
   channel: ChannelOut;
@@ -38,6 +40,29 @@ function ChannelTableActions({ channel, onEdit, onDelete }: ChannelTableActionsP
   );
 }
 
+const SENSITIVE_KEY_FRAGMENTS = ['token', 'secret', 'password', 'key', 'json'];
+
+function formatChannelConfigForDisplay(config: Record<string, any> | null | undefined): string {
+  if (!config || Object.keys(config).length === 0) {
+    return "N/A";
+  }
+
+  const entries = Object.entries(config)
+    .map(([key, value]) => {
+      const label = formatConfigKeyLabel(key);
+      const valueDisplay = SENSITIVE_KEY_FRAGMENTS.some(frag => key.toLowerCase().includes(frag))
+        ? '********'
+        : String(value);
+      return `${label}: ${valueDisplay}`;
+    });
+
+  let configStr = entries.join(', ');
+  if (configStr.length > 60) {
+    configStr = `${configStr.substring(0, 57)}...`;
+  }
+  return configStr;
+}
+
 export const getChannelTableColumns = (
   onEdit: (channel: ChannelOut) => void,
   onDelete: (channel: ChannelOut) => void
@@ -59,14 +84,10 @@ export const getChannelTableColumns = (
     accessorKey: "config",
     header: "Config",
     cell: ({ row }) => {
-      const config = row.original.config;
-      if (!config || Object.keys(config).length === 0) {
-        return <span className="text-muted-foreground">N/A</span>;
-      }
-      const configStr = JSON.stringify(config);
+      const formattedConfig = formatChannelConfigForDisplay(row.original.config);
       return (
-        <div title={configStr} className="max-w-xs truncate text-sm text-muted-foreground">
-          {configStr.length > 50 ? `${configStr.substring(0, 50)}...` : configStr}
+        <div title={formattedConfig === "N/A" ? undefined : JSON.stringify(row.original.config)} className="max-w-md truncate text-sm text-muted-foreground">
+          {formattedConfig}
         </div>
       );
     },
@@ -76,3 +97,4 @@ export const getChannelTableColumns = (
     cell: ({ row }) => <ChannelTableActions channel={row.original} onEdit={onEdit} onDelete={onDelete} />,
   },
 ];
+
