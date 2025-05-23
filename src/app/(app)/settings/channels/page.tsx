@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -8,6 +9,7 @@ import { PlusCircle, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { debounce } from "lodash";
 
 import * as api from "@/lib/api";
 import type { ChannelOut, ChannelCreate } from "@/types";
@@ -15,6 +17,8 @@ import { ChannelForm } from "@/components/settings/channels/ChannelForm";
 import { getChannelTableColumns } from "@/components/settings/channels/ChannelTableColumns";
 import { DeleteConfirmationDialog } from "@/components/settings/DeleteConfirmationDialog";
 import { DataTable } from "@/components/settings/DataTable";
+
+const PAGE_SIZE = 10;
 
 export default function ChannelsPage() {
   const queryClient = useQueryClient();
@@ -24,10 +28,34 @@ export default function ChannelsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<ChannelOut | null>(null);
 
-  const { data: channels, isLoading, error } = useQuery<ChannelOut[], Error>({
-    queryKey: ["channels"],
-    queryFn: api.listChannels,
+  const [pageIndex, setPageIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchTerm(value);
+      setPageIndex(0); // Reset to first page on new search
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(searchTerm);
+  }, [searchTerm, debouncedSetSearch]);
+
+  const { data: channelsData, isLoading, error, isPlaceholderData } = useQuery<ChannelOut[], Error>({
+    queryKey: ["channels", pageIndex, debouncedSearchTerm, PAGE_SIZE],
+    queryFn: () => api.listChannels({ 
+      skip: pageIndex * PAGE_SIZE, 
+      limit: PAGE_SIZE,
+      search: debouncedSearchTerm || undefined
+    }),
+    placeholderData: (previousData) => previousData,
   });
+
+  const channels = channelsData || [];
 
   const createMutation = useMutation<ChannelOut, Error, ChannelCreate>({
     mutationFn: api.createChannel,
@@ -98,7 +126,11 @@ export default function ChannelsPage() {
 
   const columns = useMemo(() => getChannelTableColumns(handleEditOpen, handleDeleteOpen), []);
 
-  if (isLoading) {
+  const canPreviousPage = pageIndex > 0;
+  const canNextPage = channels.length === PAGE_SIZE;
+
+
+  if (isLoading && pageIndex === 0 && !channelsData) {
     return (
       <Card>
         <CardHeader>
@@ -143,7 +175,18 @@ export default function ChannelsPage() {
         </Button>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={channels || []} searchColumn="name" searchPlaceholder="Search channels by name..."/>
+        <DataTable 
+          columns={columns} 
+          data={channels} 
+          pageIndex={pageIndex}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPageIndex}
+          canPreviousPage={canPreviousPage}
+          canNextPage={canNextPage && !isPlaceholderData}
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search channels by name..."
+        />
       </CardContent>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -8,6 +9,7 @@ import { PlusCircle, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { debounce } from "lodash";
 
 import * as api from "@/lib/api";
 import type { UserOut, UserCreate } from "@/types";
@@ -15,6 +17,8 @@ import { UserForm } from "@/components/settings/users/UserForm";
 import { getUserTableColumns } from "@/components/settings/users/UserTableColumns";
 import { DeleteConfirmationDialog } from "@/components/settings/DeleteConfirmationDialog";
 import { DataTable } from "@/components/settings/DataTable";
+
+const PAGE_SIZE = 10;
 
 export default function UsersPage() {
   const queryClient = useQueryClient();
@@ -24,10 +28,34 @@ export default function UsersPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserOut | null>(null);
 
-  const { data: users, isLoading, error } = useQuery<UserOut[], Error>({
-    queryKey: ["users"],
-    queryFn: api.listUsers,
+  const [pageIndex, setPageIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchTerm(value);
+      setPageIndex(0); // Reset to first page on new search
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(searchTerm);
+  }, [searchTerm, debouncedSetSearch]);
+
+  const { data: usersData, isLoading, error, isPlaceholderData } = useQuery<UserOut[], Error>({
+    queryKey: ["users", pageIndex, debouncedSearchTerm, PAGE_SIZE],
+    queryFn: () => api.listUsers({ 
+      skip: pageIndex * PAGE_SIZE, 
+      limit: PAGE_SIZE,
+      search: debouncedSearchTerm || undefined 
+    }),
+    placeholderData: (previousData) => previousData, // Keep previous data while loading new
   });
+  
+  const users = usersData || [];
 
   const createMutation = useMutation<UserOut, Error, UserCreate>({
     mutationFn: api.createUser,
@@ -98,7 +126,10 @@ export default function UsersPage() {
 
   const columns = useMemo(() => getUserTableColumns(handleEditOpen, handleDeleteOpen), []);
 
-  if (isLoading) {
+  const canPreviousPage = pageIndex > 0;
+  const canNextPage = users.length === PAGE_SIZE; // If we fetched a full page, there might be more
+
+  if (isLoading && pageIndex === 0 && !usersData) { // Show skeleton only on initial load
     return (
       <Card>
         <CardHeader>
@@ -143,7 +174,18 @@ export default function UsersPage() {
         </Button>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={users || []} searchColumn="name" searchPlaceholder="Search users by name..."/>
+        <DataTable 
+          columns={columns} 
+          data={users} 
+          pageIndex={pageIndex}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPageIndex}
+          canPreviousPage={canPreviousPage}
+          canNextPage={canNextPage && !isPlaceholderData}
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search users by name, email..."
+        />
       </CardContent>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
