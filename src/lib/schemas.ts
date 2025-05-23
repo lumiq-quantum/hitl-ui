@@ -3,18 +3,10 @@ import { z } from 'zod';
 export const channelSchema = z.object({
   name: z.string().min(1, "Name is required"),
   type: z.string().min(1, "Type is required"),
-  config: z.string()
-    .transform((str, ctx) => {
-      if (!str || str.trim() === "") return null;
-      try {
-        return JSON.parse(str);
-      } catch (e) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid JSON format" });
-        return z.NEVER;
-      }
-    })
+  config: z.record(z.string(), z.any().optional()) // Config is now an object
     .nullable()
-    .optional(),
+    .optional()
+    .default({}),
 });
 
 export type ChannelFormData = z.infer<typeof channelSchema>;
