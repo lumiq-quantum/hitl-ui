@@ -52,3 +52,30 @@ export function formatChannelTypeLabel(typeKey: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
+// Configuration for User-Channel mapping contact details
+export const channelContactDetailMapping: Record<string, 'email' | 'phone'> = {
+  "whatsapp": "phone",
+  "telegram": "phone",
+  "email": "email",
+  "gmail": "email",
+  "microsoft outlook": "email",
+  "microsoft teams": "email",
+  "google chat": "email",
+  "slack": "email",
+  "discord": "email"
+};
+
+export const CONTACT_KEY_EMAIL = "email_address";
+export const CONTACT_KEY_PHONE = "phone_number";
+
+/**
+ * Determines the type of input field to display for contact details based on channel type.
+ * @param channelType The type of the channel.
+ * @returns 'email', 'phone', or 'json' for generic input.
+ */
+export function getContactInputTypeForChannel(channelType: string | undefined | null): 'email' | 'phone' | 'json' {
+  if (!channelType) return 'json';
+  const lowerChannelType = channelType.toLowerCase();
+  return channelContactDetailMapping[lowerChannelType] || 'json';
+}

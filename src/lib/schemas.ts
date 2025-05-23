@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const channelSchema = z.object({
@@ -23,21 +24,7 @@ export type UserFormData = z.infer<typeof userSchema>;
 export const userChannelSchema = z.object({
   user_id: z.coerce.number().int().positive("User ID must be a positive integer"),
   channel_id: z.coerce.number().int().positive("Channel ID must be a positive integer"),
-  contact_details: z.string()
-    .min(1, "Contact details are required")
-    .transform((str, ctx) => {
-      try {
-        const parsed = JSON.parse(str);
-        if (typeof parsed !== 'object' || parsed === null) {
-           ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contact details must be a JSON object" });
-           return z.NEVER;
-        }
-        return parsed;
-      } catch (e) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid JSON format for contact details" });
-        return z.NEVER;
-      }
-    }),
+  contact_details_input: z.string().min(1, "Contact details are required"),
   is_preferred: z.boolean().nullable().optional().default(false),
 });
 
