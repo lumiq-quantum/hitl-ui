@@ -22,6 +22,7 @@ import { DeleteConfirmationDialog } from "@/components/settings/DeleteConfirmati
 import { DataTable } from "@/components/settings/DataTable";
 
 const PAGE_SIZE = 10;
+const ALL_USERS_FILTER_VALUE = "all-users-filter-value"; // Special value for "All Users"
 
 export default function UserChannelsPage() {
   const queryClient = useQueryClient();
@@ -165,8 +166,12 @@ export default function UserChannelsPage() {
   const canPreviousPage = pageIndex > 0;
   const canNextPage = userChannels.length === PAGE_SIZE;
 
-  const handleFilterUserChange = (userId: string) => {
-    setFilterUserId(userId ? parseInt(userId) : null);
+  const handleFilterUserChange = (userIdValue: string) => {
+    if (userIdValue === ALL_USERS_FILTER_VALUE) {
+      setFilterUserId(null);
+    } else {
+      setFilterUserId(parseInt(userIdValue));
+    }
     setPageIndex(0);
   };
 
@@ -181,12 +186,15 @@ export default function UserChannelsPage() {
       <div className="flex-1 min-w-[150px]">
         <Label htmlFor="userFilter">Filter by User</Label>
         {isLoadingUsersForFilter ? <Skeleton className="h-10 w-full mt-1" /> : (
-        <Select value={filterUserId?.toString() || ""} onValueChange={handleFilterUserChange} >
+        <Select 
+          value={filterUserId === null ? ALL_USERS_FILTER_VALUE : filterUserId.toString()} 
+          onValueChange={handleFilterUserChange} 
+        >
           <SelectTrigger id="userFilter" className="mt-1">
             <SelectValue placeholder="All Users" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Users</SelectItem>
+            <SelectItem value={ALL_USERS_FILTER_VALUE}>All Users</SelectItem>
             {usersForFilter?.map(user => (
               <SelectItem key={user.id} value={user.id.toString()}>
                 {user.name || `User ID: ${user.id}`} ({user.email || 'No email'})
