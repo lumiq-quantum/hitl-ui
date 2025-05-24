@@ -1,7 +1,7 @@
 # Dockerfile for Next.js project (multi-stage build)
 
 # ---- Dependencies Stage ----
-FROM node:20-slim AS deps
+FROM node:24-slim
 WORKDIR /app
 # Install dependencies based on package.json and lockfile
 COPY package.json package-lock.json* ./
